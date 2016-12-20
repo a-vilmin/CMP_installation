@@ -16,9 +16,11 @@ int main(int argc, char* argv[]){
     exit(-1);
   }
 
+  //parse arguments
   char* dissco_path = argv[1];
   char* dissco_proj = argv[2];
 
+  //fork for running DISSCO
   pid_t dissco_pid = fork();
 
   if(dissco_pid == 0){
