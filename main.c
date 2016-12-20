@@ -8,7 +8,7 @@
 
 void puts_usage(){
   puts("You forgot something! Make sure to follow example");
-  puts("./inst_handler <cmod file path> <cmod project path>");
+  puts("./inst_handler <cmod file path> <cmod project path> <seed>");
 }
 
 int main(int argc, char* argv[]){
@@ -34,7 +34,9 @@ int main(int argc, char* argv[]){
   }
   
   if(dissco_pid == 0){
-    //in child
+    //in child to exec DISSCO
+
+    //pipes for interacting with DISSCO (seed info/iterations)
     dup2(dissco_pipe[0], 0);
     close(dissco_pipe[1]);
     
@@ -50,9 +52,11 @@ int main(int argc, char* argv[]){
 
   else{
     //in parent
+
+    //send neccessary info to DISSCO to begin
     close(dissco_pipe[0]);
-    dprintf(dissco_pipe[1], "1\r");
-    dprintf(dissco_pipe[1], "%s\r", argv[4]);
+    dprintf(dissco_pipe[1], "1\n");
+    dprintf(dissco_pipe[1], "%s\n", argv[4]);
     close(dissco_pipe[1]);
 
     int status;
