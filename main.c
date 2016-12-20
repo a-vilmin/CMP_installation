@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <fcntl.h> 
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -11,7 +12,7 @@ void puts_usage(){
 }
 
 int main(int argc, char* argv[]){
-  if(argc != 3){
+  if(argc != 4){
     puts_usage();
     exit(-1);
   }
@@ -19,12 +20,24 @@ int main(int argc, char* argv[]){
   //parse arguments
   char* dissco_path = argv[1];
   char* dissco_proj = argv[2];
-
+  char* init_seed = argv[3];
+  
   //fork for running DISSCO
   pid_t dissco_pid = fork();
 
+  int dissco_pipe[2];
+  int pipe_stat = pipe2(dissco_pipe, O_CLOEXEC);
+
+  if(pipe_stat == -1){
+    perror("Pipe failed");
+    exit(errno);
+  }
+  
   if(dissco_pid == 0){
     //in child
+    dup2(dissco_pipe[0], 0);
+    close(dissco_pipe[1]);
+    
     puts("Starting DISSCO....");
     execlp(argv[1], argv[1], argv[2], (char*)NULL);
   }
@@ -37,6 +50,11 @@ int main(int argc, char* argv[]){
 
   else{
     //in parent
+    close(dissco_pipe[0]);
+    dprintf(dissco_pipe[1], "1\r");
+    dprintf(dissco_pipe[1], "%s\r", argv[4]);
+    close(dissco_pipe[1]);
+
     int status;
     waitpid(dissco_pid, &status, 0);
     if(WIFEXITED(status))
