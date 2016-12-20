@@ -5,7 +5,18 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+void puts_usage(){
+  puts("You forgot something!!");
+  puts("USE EXAMPLE-----------");
+  puts("./inst_handler <cmod file path> <cmod project path>");
+}
+
 int main(int argc, char* argv[]){
+  if(argc != 3){
+    puts_usage();
+    exit(-1);
+  }
+
   char* dissco_path = argv[1];
   char* dissco_proj = argv[2];
 
