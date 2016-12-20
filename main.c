@@ -6,8 +6,7 @@
 #include <sys/wait.h>
 
 void puts_usage(){
-  puts("You forgot something!!");
-  puts("USE EXAMPLE-----------");
+  puts("You forgot something! Make sure to follow example");
   puts("./inst_handler <cmod file path> <cmod project path>");
 }
 
