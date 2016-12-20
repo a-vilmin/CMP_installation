@@ -11,7 +11,7 @@ int main(int argc, char* argv[]){
 
   pid_t dissco_pid = fork();
 
-  if(dissco_pid > 0){
+  if(dissco_pid == 0){
     //in child
     puts("Starting DISSCO....");
     execlp(argv[1], argv[1], argv[2], (char*)NULL);
