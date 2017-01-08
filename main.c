@@ -52,7 +52,6 @@ int main(int argc, char* argv[]){
 
   else{
     //in parent
-
     //send neccessary info to DISSCO to begin
     close(dissco_pipe[0]);
     dprintf(dissco_pipe[1], "1\n");
