@@ -5,14 +5,30 @@
 #include <fcntl.h> 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <dirent.h>
+#include <string.h>
 
 void puts_usage(){
   puts("You forgot something! Make sure to follow example");
-  puts("./inst_handler <cmod file path> <cmod project path> <seed>");
+  puts("./inst_handler <cmod file path> <cmod project path>");
 }
 
+char* path_strip(char* path){
+  int len = strlen(path);
+  char* ret_path = malloc(len);
+
+  while(path[len] != '/'){
+    len--;
+  }
+  int i = 0;
+  for(; i <= len; i++){
+    ret_path[i] = path[i];
+  }
+  ret_path[i] = 0;
+  return ret_path;
+}
 int main(int argc, char* argv[]){
-  if(argc != 4){
+  if(argc != 3){
     puts_usage();
     exit(-1);
   }
@@ -20,28 +36,14 @@ int main(int argc, char* argv[]){
   //parse arguments
   char* dissco_path = argv[1];
   char* dissco_proj = argv[2];
-  char* init_seed = argv[3];
   
   //fork for running DISSCO
   pid_t dissco_pid = fork();
-
-  int dissco_pipe[2];
-  int pipe_stat = pipe2(dissco_pipe, O_CLOEXEC);
-
-  if(pipe_stat == -1){
-    perror("Pipe failed");
-    exit(errno);
-  }
   
   if(dissco_pid == 0){
     //in child to exec DISSCO
-
-    //pipes for interacting with DISSCO (seed info/iterations)
-    dup2(dissco_pipe[0], 0);
-    close(dissco_pipe[1]);
-    
     puts("Starting DISSCO....");
-    execlp(argv[1], argv[1], argv[2], (char*)NULL);
+    //execlp(argv[1], dissco_path, dissco_proj, (char*)NULL);
   }
 
   else if(dissco_pid < 0){
@@ -53,12 +55,21 @@ int main(int argc, char* argv[]){
   else{
     //in parent
     //send neccessary info to DISSCO to begin
-    close(dissco_pipe[0]);
-    dprintf(dissco_pipe[1], "1\n");
-    dprintf(dissco_pipe[1], "%s\n", argv[4]);
-    close(dissco_pipe[1]);
-
     int status;
+    char* sound_path;
+    sound_path = path_strip(dissco_proj);
+    strcat(sound_path, "SoundFiles");
+    puts(sound_path);
+
+    DIR* sound_dir = opendir(sound_path); 
+    struct dirent *entry;
+    struct stat statbuffer;
+    //add in whatever param for stopping the installation
+    while(1 && sound_dir){
+      printf("%s\n", sound_path);
+      break;
+    }
+
     waitpid(dissco_pid, &status, 0);
     if(WIFEXITED(status))
       printf("DISSCO EXITED WITH STATUS %d\n", WEXITSTATUS(status));
